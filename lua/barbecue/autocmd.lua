@@ -40,12 +40,13 @@ function M.create_updater()
   vim.api.nvim_create_autocmd(events, {
     desc = "Updater",
     group = vim.api.nvim_create_augroup(GROUP_UPDATER, {}),
+    ---@async
     callback = function() ui.update() end,
   })
-end
 
-if config.user.show_basename and config.user.show_diagnostics then
-  table.insert(events, "DiagnosticChanged")
+  if config.user.show_basename and config.user.show_diagnostics then
+    table.insert(events, "DiagnosticChanged")
+  end
 end
 
 ---Keep the theme in sync with the current colorscheme.

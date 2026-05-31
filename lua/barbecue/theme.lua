@@ -170,25 +170,29 @@ function M.get_file_icon(filename, filetype)
   local extension = string.match(basename, "%.(.*)")
 
   local icons = devicons.get_icons()
-  local icon_text, icon_color = devicons.get_icon_color(
+  local _, icon_color = devicons.get_icon_color(
     basename,
     file_extension(basename),
     { default = false }
   )
-  local icon = icons[basename] or icons[extension]
-  if icon == nil then
+
+  local icon = devicons.get_icon_by_filetype(filetype, { default = false })
+    or ""
+
+  local icon_map = icons[basename] or icons[extension]
+  if icon_map == nil then
     local name = devicons.get_icon_name_by_filetype(filetype)
-    icon = icons[name] or devicons.get_default_icon()
-    if icon == nil then return nil end
+    icon_map = icons[name] or devicons.get_default_icon()
+    if icon_map == nil then return nil end
   end
 
   local basename_extension = file_extension(basename)
-  local highlight = string.format("barbecue_fileicon_%s", icon.name)
+  local highlight = string.format("barbecue_fileicon_%s", icon_map.name)
   local cached_icon = file_icons[basename_extension]
-  if cached_icon == nil or cached_icon.color ~= icon.color then
+  if cached_icon == nil or cached_icon.color ~= icon_map.color then
     file_icons[basename_extension] = {
       highlight = highlight,
-      color = icon.color,
+      color = icon_map.color,
     }
 
     vim.api.nvim_set_hl(
@@ -197,13 +201,13 @@ function M.get_file_icon(filename, filetype)
       vim.tbl_extend(
         "force",
         current_theme ~= nil and current_theme.normal or {},
-        { foreground = icon_color or icon.color }
+        { foreground = icon_color or icon_map.color }
       )
     )
   end
 
   return {
-    icon_text or icon.icon,
+    icon,
     highlight = highlight,
   }
 end
